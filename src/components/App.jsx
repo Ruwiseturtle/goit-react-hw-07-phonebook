@@ -1,13 +1,20 @@
-
 import ContactForm from './ContactForm/ContactForm';
 import Filter from './Filter/Filter';
 import ContactList from './ContactList/ContactList';
-import { useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import './App.css';
+import { useEffect } from 'react';
+import { getRequestContacts } from '../redux/phoneBookSlice';
 
 const App = () => {
-  const contacts = useSelector(state => state.contactBook.contacts);
-  console.log(contacts);
+  const dispatch = useDispatch();
+
+   
+  useEffect(() => {
+    dispatch(getRequestContacts());
+          
+  }, [dispatch]);
+
   return (
     <div>
       <h1 className="title">Phonebook</h1>
@@ -17,6 +24,6 @@ const App = () => {
       <ContactList />
     </div>
   );
-}
+};
 
 export default App;

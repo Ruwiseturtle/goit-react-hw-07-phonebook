@@ -9,7 +9,6 @@ const Filter = () => {
   
   const selectByValues = (e) => { 
     dispatch(setFilter(e.target.value));
-
   }
 
     return (

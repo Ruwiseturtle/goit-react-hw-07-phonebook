@@ -1,47 +1,116 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import {
+  requestGetContacts,
+  requestDeleteContactId,
+  requestPOSTContacts,
+} from '../services/API';
+
+//санка для отримання усіх контактів
+export const getRequestContacts = createAsyncThunk(
+  'contacts/get',
+  async (_, thunkAPI) => {
+    try {
+      const contactsData = await requestGetContacts();      
+      return contactsData; // ЦЕ БУДЕ ЗАПИСАНО В ЕКШИН ПЕЙЛОАД
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.message);
+    }
+  }
+);
+
+//санка для отримання id контакта, який потрібно видалити
+export const deleteRequestContact = createAsyncThunk(
+  'contacts/delete',
+  async (id, thunkAPI) => {   
+    try {
+      const contactId = await requestDeleteContactId(id);
+      return contactId; // ЦЕ БУДЕ ЗАПИСАНО В ЕКШИН ПЕЙЛОАД
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.message);
+    }
+  }
+);
+
+export const addRequestContact = createAsyncThunk(
+  'contacts/add',
+  async (newContact, thunkAPI) => {
+    try {
+      const contact = await requestPOSTContacts(newContact);
+      return contact; // ЦЕ БУДЕ ЗАПИСАНО В ЕКШИН ПЕЙЛОАД
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.message);
+    }
+  }
+);
+
 
 const INITIAL_STATE = {
+  // contacts: [],
+  // isLoading: false,
+  // error: null,
+  // filter:'',
+  contacts: {
+    items: [],
+    isLoading: false,
+    error: null,
+  },
   filter: '',
-  name: '',
-  number: '',
-  contacts: [
-    { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
-    { id: 'id-2', name: 'Hermione Kline', number: '443-89-12' },
-    { id: 'id-3', name: 'Eden Clements', number: '645-17-79' },
-    { id: 'id-4', name: 'Annie Copeland', number: '227-91-26' },
-  ],
 };
 
-const phoneBookSlice = createSlice({
-  name: 'contactBook',
+const contactsSlice = createSlice({
+  name: 'contacts',
   initialState: INITIAL_STATE,
   reducers: {
-    addContact(state, action) {
-      state.contacts = [...state.contacts, action.payload];
-    },
-    deleteContact(state, action) {
-      state.contacts = state.contacts.filter(
-        contact => contact.id !== action.payload
-      );
-    },
-    setFilter(state, action) {
+    setFilter: (state, action) => {
       state.filter = action.payload;
     },
-    setName(state, action) {
-      state.name = action.payload;
-    },
-    setNumber(state, action) {
-      state.number = action.payload;
-    },
   },
+  extraReducers: builder =>
+    builder
+      //кейси для отримання контактів
+      .addCase(getRequestContacts.pending, state => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(getRequestContacts.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.items = action.payload; // state.posts = action.payload
+      })
+      .addCase(getRequestContacts.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+      })
+      //кейси для видалення контактів
+      .addCase(deleteRequestContact.pending, state => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(deleteRequestContact.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.items = state.items.filter(
+          contact => contact.id !== action.payload.id
+        );
+      })
+      .addCase(deleteRequestContact.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+      })
+      //кейси для додавання контактів
+      .addCase(addRequestContact.pending, state => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(addRequestContact.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.items.unshift(action.payload);        
+        // state.items = [action.payload, ...state.items];
+        // state.items.push(action.payload); для прикладу собі зберегла :D
+      })
+      .addCase(addRequestContact.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;        
+      }),
 });
 
-export const {
-  addContact,
-  deleteContact,
-  changeFilter,
-  setFilter,
-  setName,
-  setNumber,
-} = phoneBookSlice.actions;
-export const phoneBookReducer = phoneBookSlice.reducer;
+export const { setFilter } = contactsSlice.actions;
+export const contactsReducer = contactsSlice.reducer;
