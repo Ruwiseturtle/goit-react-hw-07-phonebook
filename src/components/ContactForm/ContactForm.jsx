@@ -21,6 +21,7 @@ const ContactForm = () => {
 
     if (isThereSuchUser) {
       Notiflix.Notify.info('this contact is already in the list!');
+      event.currentTarget.reset();
       return;
     }
 
