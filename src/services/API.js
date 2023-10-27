@@ -9,7 +9,7 @@ export const requestGetContacts = async () => {
     return data;
 }
 
-//доробити - вставить вірну ссилку
+//доробити - вставить вірну силку
 export const requestDeleteContactId = async (id) => {
   const { data } = await contactsInstance.delete(`/contacts/${id}`);
   return data;
